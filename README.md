@@ -38,7 +38,7 @@ straight outta github, crazy app named Eazy-Edit, from the gang called Developer
 
 ## Usage
 
-1. Open the `index.html` file in your web browser to start the game.
+1. Open the `index.js` file in your web browser to start the game.
 
 ## Demo
 
