@@ -1,9 +1,9 @@
 import React from 'react';
-import PhotoEditor from './components/PhotoEditor';
+import PhotoEditor from './componets/PhotoEditor';
 
 const App = () => {
     return (
-        <div>
+        <div className='=App'>
             <PhotoEditor />
         </div>
     );
