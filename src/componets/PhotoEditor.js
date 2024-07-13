@@ -36,7 +36,6 @@ const PhotoEditor = () => {
                 link.href = URL.createObjectURL(blob);
                 link.click();
             }, 'image/jpeg', 0.7); 
-            // 'image/jpeg' and quality 0.7 to reduce file size
         });
     };
 
@@ -69,6 +68,7 @@ const PhotoEditor = () => {
         const data = await response.blob();
         const imageUrl = URL.createObjectURL(data);
         dispatch(setImage(imageUrl));
+        
     };
 
     return (
