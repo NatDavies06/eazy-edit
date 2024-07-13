@@ -7,6 +7,7 @@ const PhotoEditor = () => {
     const dispatch = useDispatch();
     const currentFilter = useSelector(state => state.currentFilter);
     const elements = useSelector(state => state.elements);
+    const selectedImage = useSelector(state => state.selectedImage);
 
     const applyFilterHandler = (filter, value) => {
         dispatch(applyFilter(filter, value));
@@ -17,7 +18,11 @@ const PhotoEditor = () => {
         Array.from(files).forEach(file => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                dispatch(addElement({ type: 'image', src: e.target.result, style: { position: 'absolute', top: '0', left: '0', width: '100px', height: '100px' } }));
+                const image = new Image();
+                image.src = e.target.result;
+                image.onload = () => {
+                    dispatch(addElement({ src: image.src, style: { filter: currentFilter } }));
+                };
             };
             reader.readAsDataURL(file);
         });
@@ -30,7 +35,8 @@ const PhotoEditor = () => {
                 link.download = "image.png";
                 link.href = URL.createObjectURL(blob);
                 link.click();
-            }, 'image/jpeg', 0.7); // 'image/jpeg' and quality 0.7 to reduce file size
+            }, 'image/jpeg', 0.7); 
+            // 'image/jpeg' and quality 0.7 to reduce file size
         });
     };
 
