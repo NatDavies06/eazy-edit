@@ -36,9 +36,19 @@ straight outta github, crazy app named Eazy-Edit, from the gang called Developer
     cd eazy-edit
     ```
 
+3. Install the required dependencies:
+    ```bash
+    npm install
+    ```
+
 ## Usage
 
-1. Open the `index.js` file in your web browser to start the game.
+1. After installation, start the development server by running:
+    ```bash
+    npm start
+    ```
+
+2. Open your browser and go to `http://localhost:3000` to start using Eazy-Edit.
 
 ## Demo
 
