@@ -1,31 +1,131 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   font-family: Arial, sans-serif;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   height: 100vh;
-  margin: 0;
-  background: #f0f0f0;
+  background: #f9f9f9;
+  justify-content: flex-start;
 }
 
 h1 {
+  font-size: 3rem;
+  color: #333;
+  margin-top: 20px;
   text-align: center;
+  font-family: 'Arial', sans-serif;
 }
 
-#canvas {
-  border: 1px solid #ccc;
-  margin: 20px 0;
+header {
+  width: 100%;
+  background-color: #007bff;
+  color: rgba(255, 255, 255, 0.894);
+  padding: 20px 0;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
 }
 
+.app-container {
+  max-width: 900px;
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.984);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* File upload section */
 input[type="file"] {
-  margin: 20px;
+  margin: 20px 0;
+  padding: 10px;
+  font-size: 1rem;
+  background-color: #fffffff3;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-button {
-  margin: 5px;
-  padding: 10px;
+input[type="file"]:hover {
+  background-color: #f1f1f1;
+}
+
+/* Controls section */
+div input[type="range"] {
+  margin: 10px;
+  width: 100%;
 }
 
 div {
-  margin: 5px;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 400px;
+}
+
+label {
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+button {
+  margin: 10px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: rgba(255, 255, 255, 0.984);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#canvas-container {
+  margin-top: 20px;
+  padding: 10px;
+}
+
+canvas {
+  border: 1px solid #ccc;
+  display: block;
+  margin: 20px 0;
+  max-width: 100%;
+  background: #fffffff3;
+}
+
+@media screen and (max-width: 768px) {
+  .app-container {
+    padding: 15px;
+    width: 90%;
+  }
+
+  header {
+    font-size: 1.5rem;
+    padding: 15px 0;
+  }
+
+  div {
+    margin: 10px;
+  }
+
+  button {
+    width: 100%;
+    padding: 10px;
+  }
+
+  input[type="file"] {
+    width: 100%;
+    padding: 15px;
+  }
 }

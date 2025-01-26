@@ -1,102 +1,109 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
-import { applyFilter, addElement, setImage } from '../redux/actions';
+import * as glfx from 'glfx';
+import * as bodyPix from '@tensorflow-models/body-pix';
 
 const PhotoEditor = () => {
-    const dispatch = useDispatch();
-    const currentFilter = useSelector(state => state.currentFilter);
-    const elements = useSelector(state => state.elements);
-    const selectedImage = useSelector(state => state.selectedImage);
+    const canvasRef = useRef(null);
+    const [uploadedImage, setUploadedImage] = useState(null);
 
-    const applyFilterHandler = (filter, value) => {
-        dispatch(applyFilter(filter, value));
+    const loadImageToCanvas = (imageSrc) => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.src = imageSrc;
+        
+        img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+        };
     };
 
     const handleImageUpload = (event) => {
-        const files = event.target.files;
-        Array.from(files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const image = new Image();
-                image.src = e.target.result;
-                image.onload = () => {
-                    dispatch(addElement({ src: image.src, style: { filter: currentFilter } }));
-                };
-            };
-            reader.readAsDataURL(file);
-        });
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setUploadedImage(e.target.result);
+            loadImageToCanvas(e.target.result);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const applyFilter = (filter) => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.filter = filter;
+        const img = new Image();
+        img.src = uploadedImage;
+        img.onload = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+        };
+    };
+
+    const removeBackground = async () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const net = await bodyPix.load();
+
+        const img = new Image();
+        img.src = uploadedImage;
+        img.onload = async () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            const segmentation = await net.segmentPerson(canvas);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                if (segmentation.data[i / 4] === 0) {
+                    data[i + 3] = 0;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        };
     };
 
     const handleExport = () => {
-        html2canvas(document.querySelector("#canvas")).then(canvas => {
-            canvas.toBlob((blob) => {
-                const link = document.createElement("a");
-                link.download = "image.png";
-                link.href = URL.createObjectURL(blob);
-                link.click();
-            }, 'image/jpeg', 0.7); 
+        html2canvas(canvasRef.current).then((canvas) => {
+            const link = document.createElement('a');
+            link.download = 'edited-image.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
         });
-    };
-
-    const removeBackground = async (image) => {
-        const formData = new FormData();
-        formData.append('image_file', image);
-
-        const response = await fetch('https://api.remove.bg/v1.0/removebg', {
-            method: 'POST',
-            headers: {
-                'X-Api-Key': 'YOUR_API_KEY'
-            },
-            body: formData
-        });
-
-        const data = await response.blob();
-        const imageUrl = URL.createObjectURL(data);
-        dispatch(setImage(imageUrl));
-    };
-
-    const enhanceImage = async (image) => {
-        const formData = new FormData();
-        formData.append('image_file', image);
-
-        const response = await fetch('https://api.ai-enhance.com/enhance', {
-            method: 'POST',
-            body: formData
-        });
-
-        const data = await response.blob();
-        const imageUrl = URL.createObjectURL(data);
-        dispatch(setImage(imageUrl));
-        
     };
 
     return (
-        <div>
-            <label>Brightness: </label>
-            <input type="range" min="0" max="200" defaultValue="100" onChange={(e) => applyFilterHandler('brightness', `brightness(${e.target.value}%)`)} />
+        <div className="app-container">
+            <header>
+                Eazy-Edit
+            </header>
+            <input type="file" accept="image/*" onChange={handleImageUpload} />
+            
+            <div style={{ margin: '20px 0' }}>
+                <label>Brightness: </label>
+                <input type="range" min="0" max="200" defaultValue="100" onChange={(e) => applyFilter(`brightness(${e.target.value}%)`)} />
 
-            <label>Contrast: </label>
-            <input type="range" min="0" max="200" defaultValue="100" onChange={(e) => applyFilterHandler('contrast', `contrast(${e.target.value}%)`)} />
+                <label>Contrast: </label>
+                <input type="range" min="0" max="200" defaultValue="100" onChange={(e) => applyFilter(`contrast(${e.target.value}%)`)} />
 
-            <label>Grayscale: </label>
-            <input type="range" min="0" max="100" defaultValue="0" onChange={(e) => applyFilterHandler('grayscale', `grayscale(${e.target.value}%)`)} />
+                <label>Grayscale: </label>
+                <input type="range" min="0" max="100" defaultValue="0" onChange={(e) => applyFilter(`grayscale(${e.target.value}%)`)} />
 
-            <label>Sepia: </label>
-            <input type="range" min="0" max="100" defaultValue="0" onChange={(e) => applyFilterHandler('sepia', `sepia(${e.target.value}%)`)} />
+                <label>Sepia: </label>
+                <input type="range" min="0" max="100" defaultValue="0" onChange={(e) => applyFilter(`sepia(${e.target.value}%)`)} />
+            </div>
 
-            <input type="file" multiple onChange={handleImageUpload} />
-
+            <button onClick={removeBackground}>Remove Background</button>
             <button onClick={handleExport}>Export</button>
 
-            <button onClick={() => removeBackground(selectedImage)}>Remove Background</button>
-
-            <button onClick={() => enhanceImage(selectedImage)}>Enhance Image</button>
-
-            <div id="canvas">
-                {elements.map((element, index) => (
-                    <img key={index} src={element.src} style={element.style} alt="Element" />
-                ))}
+            <div id="canvas-container">
+                <canvas ref={canvasRef}></canvas>
             </div>
         </div>
     );
