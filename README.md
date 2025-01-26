@@ -52,7 +52,6 @@ straight outta github, crazy app named Eazy-Edit, from the gang called Developer
 
 ## Demo
 
-- Coming Soon!
 
 ## Contributing
 
