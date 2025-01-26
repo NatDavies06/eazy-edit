@@ -1,5 +1,6 @@
 import React from 'react';
-import PhotoEditor from './componets/PhotoEditor';
+import PhotoEditor from './components/PhotoEditor';
+
 
 const App = () => {
     return (
